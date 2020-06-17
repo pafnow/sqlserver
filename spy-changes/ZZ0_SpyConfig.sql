@@ -1,0 +1,21 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[ZZ0_SpyConfig](
+	[SchemaName] [varchar](255) NOT NULL,
+	[TableName] [varchar](255) NOT NULL,
+	[TriggerName]  AS ('ZZ0_Spy_'+[TableName]),
+	[ColumnsToSpy] [varchar](max) NOT NULL,
+ CONSTRAINT [PK_ZZ0_SpyConfig_1] PRIMARY KEY CLUSTERED 
+(
+	[SchemaName] ASC,
+	[TableName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[ZZ0_SpyConfig] ADD  CONSTRAINT [DF_ZZ0_SpyConfig_ColumnsToSpy]  DEFAULT ('%') FOR [ColumnsToSpy]
+GO
