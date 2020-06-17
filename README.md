@@ -1,1 +1,2 @@
-# sqlserverhttps://github.com/pafnow/sqlserver
+# sqlserver
+Toolbox for SQL Server
