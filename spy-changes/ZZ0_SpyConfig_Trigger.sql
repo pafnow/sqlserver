@@ -15,7 +15,7 @@ BEGIN
   DECLARE @CountIns int = (SELECT COUNT('') FROM inserted);
   DECLARE @CountDel int = (SELECT COUNT('') FROM deleted);
   DECLARE @CountRec int = CASE WHEN @CountIns >= @CountDel THEN @CountIns ELSE @CountDel END;
-  IF (@CountRec = 0) RETURN; --Exit quand la clause WHERE ne ramÃ¨ne aucun enregistrement
+  IF (@CountRec = 0) RETURN; --Exit quand la clause WHERE ne ramène aucun enregistrement
   DECLARE @SqlAction varchar(6) = CASE WHEN @CountIns = 0 AND @CountDel = 0 THEN '(NONE)'
                                        WHEN @CountIns <>0 AND @CountDel = 0 THEN 'INSERT'
                                        WHEN @CountIns <>0 AND @CountDel <>0 THEN 'UPDATE'
@@ -72,7 +72,7 @@ BEGIN
              ) a );
 
     SET @SqlCmd = 
-      + 'CREATE OR ALTER TRIGGER '+@SchemaName+'.'+@TriggerName+' ON '+@SchemaName+'.'+@TableName+' WITH EXECUTE AS OWNER AFTER INSERT,DELETE,UPDATE AS' + CHAR(13)+CHAR(10)
+      + 'CREATE OR ALTER TRIGGER '+@SchemaName+'.'+@TriggerName+' ON '+@SchemaName+'.'+@TableName+' AFTER INSERT,DELETE,UPDATE AS' + CHAR(13)+CHAR(10)
       + 'BEGIN' + CHAR(13)+CHAR(10)
       + '  SET NOCOUNT ON;' + CHAR(13)+CHAR(10) + CHAR(13)+CHAR(10)
       + '  -- QUIT IF NESTED EXECUTION --' + CHAR(13)+CHAR(10)
@@ -81,7 +81,7 @@ BEGIN
       + '  DECLARE @CountIns int = (SELECT COUNT(1) FROM inserted);' + CHAR(13)+CHAR(10)
       + '  DECLARE @CountDel int = (SELECT COUNT(1) FROM deleted);' + CHAR(13)+CHAR(10)
       + '  DECLARE @CountRec int = CASE WHEN @CountIns >= @CountDel THEN @CountIns ELSE @CountDel END;' + CHAR(13)+CHAR(10)
-      + '  IF (@CountRec = 0) RETURN; --Exit quand la clause WHERE ne ramÃ¨ne aucun enregistrement' + CHAR(13)+CHAR(10)
+      + '  IF (@CountRec = 0) RETURN; --Exit quand la clause WHERE ne ramène aucun enregistrement' + CHAR(13)+CHAR(10)
       + '  DECLARE @SqlAction varchar(6) = CASE WHEN @CountIns = 0 AND @CountDel = 0 THEN ''(NONE)''' + CHAR(13)+CHAR(10)
       + '                                       WHEN @CountIns <>0 AND @CountDel = 0 THEN ''INSERT''' + CHAR(13)+CHAR(10)
       + '                                       WHEN @CountIns <>0 AND @CountDel <>0 THEN ''UPDATE''' + CHAR(13)+CHAR(10)
@@ -89,10 +89,10 @@ BEGIN
       + '                                  ELSE '''' END;' + CHAR(13)+CHAR(10) + CHAR(13)+CHAR(10)
       + '  INSERT INTO ZZ0_Spy ([TableName], [SqlAction], [CountRec], [PrimaryKey], [Changes])' + CHAR(13)+CHAR(10)
       + '  SELECT '''+@TableName+''', LEFT(@SqlAction,1), @CountRec' + CHAR(13)+CHAR(10)
-      + '       , '+@FieldsPK      + CHAR(13)+CHAR(10)
+      + '       , COALESCE(' + @FieldsPK + ',' + REPLACE(@FieldsPK,'i.[','d.[') + ')' + CHAR(13)+CHAR(10)
       + '       , '+@FieldsChanges + CHAR(13)+CHAR(10)
       + '    FROM inserted i' + CHAR(13)+CHAR(10)
-      + '    LEFT JOIN deleted d ON ' + @JoinPK + CHAR(13)+CHAR(10)
+      + '    FULL JOIN deleted d ON ' + @JoinPK + CHAR(13)+CHAR(10)
       + 'END;' + CHAR(13)+CHAR(10);
     EXEC (@SqlCmd);
     RETURN;
